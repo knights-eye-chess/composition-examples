@@ -5,28 +5,26 @@ packages without importing application source. The examples are executable
 tools, not a release gate for the app. The [license layout](LICENSES.md)
 applies per example.
 
-## Setup before coordinated package publication
+## Setup
 
 ```sh
-node scripts/install-candidates.mjs /path/to/move-classifier.tgz /path/to/ai-analysis.tgz /path/to/uci-client.tgz
+npm ci
 npm run build:wintrchess
 npm test
 ```
 
-The coordinated versions are still local release candidates and are not yet
-on npm. Pass all three reviewed archives in one invocation; npm's `--no-save`
-install otherwise restores the older published versions from `package.json`
-on the next install. The checked-in root lockfile records those older published
-versions and does not make `npm ci`
-usable for these new examples yet. Once the graph is published, its exact
-registry dependencies and lockfile must be updated together and verified with
-`npm ci` from a clean checkout.
+The root package and lockfile pin the published component versions exactly:
+move-classifier `0.1.0-dev.15`, ai-analysis `0.1.0-dev.21`, and uci-client
+`0.1.0-dev.3`. `npm ci` installs this graph from the public registry.
 
-The [manual candidate smoke workflow](.github/workflows/candidate-smoke.yml)
+For archive-level review, `node scripts/install-candidates.mjs` accepts three
+reviewed component archives in classifier, AI, UCI order. The
+[manual candidate smoke workflow](.github/workflows/candidate-smoke.yml)
 accepts full reviewed source commits, archive paths under each component's
 `artifacts/` directory, and exact archive SHA-256 values. It verifies the
 archives before installing, building and testing. It is advisory for this
-repository and does not gate application releases.
+repository and does not gate application releases. Archive installation is a
+separate review path; ordinary use should follow the checked-in registry lock.
 
 Do not edit installed package files or use sibling source aliases. `build:wintrchess`
 sparse-checks out its exact upstream commit into ignored `.upstream/` and
