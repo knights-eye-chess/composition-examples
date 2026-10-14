@@ -14,8 +14,9 @@
     "examples:compare": "node wintrchess-comparison/cli.mjs"
   },
   "dependencies": {
-    "@knights-eye-chess/ai-analysis": "0.1.0-dev.18",
-    "@knights-eye-chess/move-classifier": "0.1.0-dev.14",
+    "@knights-eye-chess/ai-analysis": "0.1.0-dev.21",
+    "@knights-eye-chess/move-classifier": "0.1.0-dev.15",
+    "@knights-eye-chess/uci-client": "0.1.0-dev.3",
     "chess.js": "1.4.0",
     "lodash-es": "4.17.21",
     "zod": "4.6.7"
