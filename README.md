@@ -1,9 +1,9 @@
 # Knight's Eye composition examples
 
 Four Node 24+ examples show how to combine installed Knight's Eye public
-packages without importing application source. This is a local, unpublished
-example repository. The examples are executable tools, not a release gate for
-the app. The [license layout](LICENSES.md) applies per example.
+packages without importing application source. The examples are executable
+tools, not a release gate for the app. The [license layout](LICENSES.md)
+applies per example.
 
 ## Setup before coordinated package publication
 
@@ -13,15 +13,20 @@ npm run build:wintrchess
 npm test
 ```
 
-The exact candidate graph tested here is move-classifier `0.1.0-dev.15`,
-ai-analysis `0.1.0-dev.20`, and uci-client `0.1.0-dev.1`. These versions are
-local release candidates and are not yet on npm. Pass all three reviewed
-archives in one invocation; npm's `--no-save` install otherwise restores the
-older published versions from `package.json` on the next install. The checked-in
-root lockfile records those older published versions and does not make `npm ci`
+The coordinated versions are still local release candidates and are not yet
+on npm. Pass all three reviewed archives in one invocation; npm's `--no-save`
+install otherwise restores the older published versions from `package.json`
+on the next install. The checked-in root lockfile records those older published
+versions and does not make `npm ci`
 usable for these new examples yet. Once the graph is published, its exact
 registry dependencies and lockfile must be updated together and verified with
 `npm ci` from a clean checkout.
+
+The [manual candidate smoke workflow](.github/workflows/candidate-smoke.yml)
+accepts full reviewed source commits, archive paths under each component's
+`artifacts/` directory, and exact archive SHA-256 values. It verifies the
+archives before installing, building and testing. It is advisory for this
+repository and does not gate application releases.
 
 Do not edit installed package files or use sibling source aliases. `build:wintrchess`
 sparse-checks out its exact upstream commit into ignored `.upstream/` and
@@ -63,7 +68,8 @@ The comparison runner memoizes *completed engine searches* by full request
 caches. Display records have keys containing policy ID, revision and exact move
 occurrence; they are never used as search evidence. Knight's Eye may require
 additional restricted verification searches. Those are visible as distinct
-request keys and cannot be assumed shareable with WintrChess.
+request keys and cannot be assumed shareable with WintrChess. The classifier
+engine wrapper requires full coverage of explicitly named root moves.
 
 `fixtures/sacrifice.pgn` comes from the existing modularity phase-04 chess
 fixture. A one-move comparison with deterministic engine evidence is tested
