@@ -1,0 +1,22 @@
+{
+  "name": "@knights-eye-chess/composition-examples",
+  "version": "0.0.0-local",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "build:wintrchess": "node wintrchess-comparison/build.mjs",
+    "test": "node --test wintrchess-comparison/test/*.test.mjs",
+    "examples:engine": "node engine-only/cli.mjs",
+    "examples:annotation": "node annotation/cli.mjs",
+    "examples:answer": "node ai-cli/cli.mjs",
+    "examples:compare": "node wintrchess-comparison/cli.mjs"
+  },
+  "dependencies": {
+    "@knights-eye-chess/ai-analysis": "0.1.0-dev.18",
+    "@knights-eye-chess/move-classifier": "0.1.0-dev.14",
+    "chess.js": "1.4.0",
+    "lodash-es": "4.17.21"
+  },
+  "devDependencies": { "esbuild": "0.28.0" }
+}

@@ -1,0 +1,4 @@
+node_modules/
+wintrchess-comparison/.upstream/
+wintrchess-comparison/dist/
+*.log
