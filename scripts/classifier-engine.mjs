@@ -6,7 +6,7 @@ export function createClassifierEngine(options) {
   return {
     capabilities: { multiPv: true, rootMoves: true },
     search({ fen, depth, multiPv, rootMoves, signal }) {
-      return client.search({ fen, limit: { depth }, multiPv, rootMoves, signal });
+      return client.search({ fen, limit: { depth }, multiPv, rootMoves, signal, requireRootCoverage: true });
     },
     close: () => client.close(),
   };

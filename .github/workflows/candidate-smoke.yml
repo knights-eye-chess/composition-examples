@@ -1,0 +1,118 @@
+name: Advisory candidate smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      classifier_commit:
+        description: Reviewed full move-classifier commit SHA
+        required: true
+        type: string
+      classifier_archive:
+        description: Archive path under move-classifier artifacts/
+        required: true
+        type: string
+      classifier_sha256:
+        description: Reviewed classifier archive SHA-256
+        required: true
+        type: string
+      ai_commit:
+        description: Reviewed full ai-analysis commit SHA
+        required: true
+        type: string
+      ai_archive:
+        description: Archive path under ai-analysis artifacts/
+        required: true
+        type: string
+      ai_sha256:
+        description: Reviewed AI archive SHA-256
+        required: true
+        type: string
+      uci_commit:
+        description: Reviewed full uci-client commit SHA
+        required: true
+        type: string
+      uci_archive:
+        description: Archive path under uci-client artifacts/
+        required: true
+        type: string
+      uci_sha256:
+        description: Reviewed UCI archive SHA-256
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  examples:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check reviewed candidate coordinates
+        env:
+          CLASSIFIER_COMMIT: ${{ inputs.classifier_commit }}
+          CLASSIFIER_ARCHIVE: ${{ inputs.classifier_archive }}
+          CLASSIFIER_SHA256: ${{ inputs.classifier_sha256 }}
+          AI_COMMIT: ${{ inputs.ai_commit }}
+          AI_ARCHIVE: ${{ inputs.ai_archive }}
+          AI_SHA256: ${{ inputs.ai_sha256 }}
+          UCI_COMMIT: ${{ inputs.uci_commit }}
+          UCI_ARCHIVE: ${{ inputs.uci_archive }}
+          UCI_SHA256: ${{ inputs.uci_sha256 }}
+        run: |
+          set -euo pipefail
+          for variable in CLASSIFIER_COMMIT AI_COMMIT UCI_COMMIT; do
+            [[ ${!variable} =~ ^[0-9a-f]{40}$ ]] || exit 2
+          done
+          for variable in CLASSIFIER_SHA256 AI_SHA256 UCI_SHA256; do
+            [[ ${!variable} =~ ^[0-9a-f]{64}$ ]] || exit 2
+          done
+          [[ $CLASSIFIER_ARCHIVE =~ ^artifacts/knights-eye-chess-move-classifier-0\.1\.0-dev\.[0-9]+\.tgz$ ]] || exit 2
+          [[ $AI_ARCHIVE =~ ^artifacts/knights-eye-chess-ai-analysis-0\.1\.0-dev\.[0-9]+\.tgz$ ]] || exit 2
+          [[ $UCI_ARCHIVE =~ ^artifacts/knights-eye-chess-uci-client-0\.1\.0-dev\.[0-9]+\.tgz$ ]] || exit 2
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: knights-eye-chess/move-classifier
+          ref: ${{ inputs.classifier_commit }}
+          path: candidates/classifier
+          sparse-checkout: artifacts
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: knights-eye-chess/ai-analysis
+          ref: ${{ inputs.ai_commit }}
+          path: candidates/ai
+          sparse-checkout: artifacts
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: knights-eye-chess/uci-client
+          ref: ${{ inputs.uci_commit }}
+          path: candidates/uci
+          sparse-checkout: artifacts
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify archives and run examples
+        env:
+          CLASSIFIER_ARCHIVE: ${{ inputs.classifier_archive }}
+          CLASSIFIER_SHA256: ${{ inputs.classifier_sha256 }}
+          AI_ARCHIVE: ${{ inputs.ai_archive }}
+          AI_SHA256: ${{ inputs.ai_sha256 }}
+          UCI_ARCHIVE: ${{ inputs.uci_archive }}
+          UCI_SHA256: ${{ inputs.uci_sha256 }}
+        run: |
+          set -euo pipefail
+          classifier="candidates/classifier/$CLASSIFIER_ARCHIVE"
+          ai="candidates/ai/$AI_ARCHIVE"
+          uci="candidates/uci/$UCI_ARCHIVE"
+          printf '%s  %s\n' "$CLASSIFIER_SHA256" "$classifier" | sha256sum --check --status
+          printf '%s  %s\n' "$AI_SHA256" "$ai" | sha256sum --check --status
+          printf '%s  %s\n' "$UCI_SHA256" "$uci" | sha256sum --check --status
+          node scripts/install-candidates.mjs "$classifier" "$ai" "$uci"
+          npm run build:wintrchess
+          npm test
