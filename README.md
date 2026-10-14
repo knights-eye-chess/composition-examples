@@ -5,20 +5,24 @@ packages without importing application source. This is a local, unpublished
 example repository. The examples are executable tools, not a release gate for
 the app. The [license layout](LICENSES.md) applies per example.
 
-## Setup
+## Setup before coordinated package publication
 
 ```sh
-npm install
 node scripts/install-candidates.mjs /path/to/move-classifier.tgz /path/to/ai-analysis.tgz /path/to/uci-client.tgz
 npm run build:wintrchess
 npm test
 ```
 
-Use candidate archives from the component repositories to test a coordinated
-change before publication. Pass all three archives in one invocation; npm's
-`--no-save` install otherwise restores versions from `package.json` on the next
-install. `npm install` alone uses the pinned published classifier and AI
-prereleases; the new UCI client is currently supplied as a candidate archive.
+The exact candidate graph tested here is move-classifier `0.1.0-dev.15`,
+ai-analysis `0.1.0-dev.20`, and uci-client `0.1.0-dev.1`. These versions are
+local release candidates and are not yet on npm. Pass all three reviewed
+archives in one invocation; npm's `--no-save` install otherwise restores the
+older published versions from `package.json` on the next install. The checked-in
+root lockfile records those older published versions and does not make `npm ci`
+usable for these new examples yet. Once the graph is published, its exact
+registry dependencies and lockfile must be updated together and verified with
+`npm ci` from a clean checkout.
+
 Do not edit installed package files or use sibling source aliases. `build:wintrchess`
 sparse-checks out its exact upstream commit into ignored `.upstream/` and
 bundles `shared/src/lib/reporter/classify.ts` as-is with esbuild.
